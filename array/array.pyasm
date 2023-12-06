@@ -1,0 +1,30 @@
+# int a[] = {3, 4};
+    LOAD_CONST          3
+    LOAD_CONST          4
+    BUILD_LIST          2
+    STORE_NAME          a
+    
+# a[0] = 5;
+    LOAD_NAME           a
+    LOAD_CONST          0
+    LOAD_CONST          5
+    ROT_THREE
+    STORE_SUBSCR
+
+# printf("%d\n",
+    LOAD_GLOBAL         print
+    LOAD_CONST          "%d\n"
+# a[0]
+    LOAD_NAME           a
+    LOAD_CONST          0
+    BINARY_SUBSCR
+# );
+    BINARY_MODULO
+    CALL_FUNCTION       1
+    POP_TOP
+
+    LOAD_CONST          None
+    RETURN_VALUE
+
+# symbol_table: ['a']
+
