@@ -243,9 +243,7 @@ class ÇParser(Parser):
 
     @_('expressions "," expression')
     def expressions(self, p):
-        print('# ex', p.expression)
         self.num_elements += 1
-        # print('LIST_APPEND', p.expression)
         pass
 
     @_('expression')
@@ -315,11 +313,15 @@ class ÇParser(Parser):
         self.used_vars[self.symbols_table.index(p.NAME)] = True
         print('LOAD_NAME', p.NAME)
 
-    @_('NAME "[" expression "]"')
-    def factor(self, p):
+    @_('NAME')
+    def array_factor(self, p):
         if (p.NAME not in self.symbols_table):
             self.show_error(f"unknown variable '{p.NAME}'", p.lineno)
         self.used_vars[self.symbols_table.index(p.NAME)] = True
+        print('LOAD_NAME', p.NAME)
+
+    @_('array_factor "[" expression "]"')
+    def factor(self, p):
         print("BINARY_SUBSCR")
 
 #################### MAIN ####################
