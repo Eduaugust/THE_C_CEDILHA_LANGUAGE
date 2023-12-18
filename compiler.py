@@ -12,7 +12,7 @@ class ÇLexer(Lexer):
     
     # token definitions
     literals = {';', '+', '-', '*', '/', '(', ')', '{', '}', ',', '=', '%', '[', ']'}
-    tokens = {STDIO, INT, MAIN, PRINTF, STRING, NUMBER, NAME, IF, COMP, WHILE, BREAKCONTINUE}
+    tokens = {STDIO, INT, MAIN, PRINTF, STRING, NUMBER, NAME, IF, COMP, WHILE, BREAKCONTINUE, VOID}
     STDIO   = '#include <stdio.h>'
     INT     = 'int'
     MAIN    = 'main'
@@ -23,6 +23,7 @@ class ÇLexer(Lexer):
     COMP = r'(==|!=|<=|>=|<|>)'
     WHILE = 'while'
     BREAKCONTINUE = r'(break|continue)'
+    VOID = 'void'
 
     # Deixar por último para não conflitar com as palavras reservadas
     NAME    = r'[a-z]+'
@@ -65,6 +66,9 @@ class ÇParser(Parser):
         # array
         self.num_elements = 0
 
+        # parameter
+        self.parameter_symbol_table = []
+
     # error handling method
     def show_error(self, mesg, line=None):
         if line:
@@ -81,7 +85,7 @@ class ÇParser(Parser):
     
     # ---------------- program ----------------
 
-    @_('STDIO main')
+    @_('stdio functions main')
     def program(self, p):
         print('\n# symbols table:', self.symbols_table)
         print('\n# used variables:', self.used_vars)
@@ -90,13 +94,70 @@ class ÇParser(Parser):
             for var in unusued_vars:
                 self.show_warning(f'{var} is defined but never used')
 
+    @_('STDIO')
+    def stdio(self, p):
+        print("# include <stdio.h>")
+        print('LOAD_CONST 0')
+        print('LOAD_CONST None')
+        print('IMPORT_NAME runtime')
+        print('IMPORT_STAR')
+        print()
+
+    # ---------------- functions --------------
+
+    @_('function functions')
+    def functions(self, p):
+        pass
+
+    @_('')
+    def functions(self, p):
+        pass
+
+    @_('NAME "(" parameters ")"' )
+    def function_name(self,p):
+        print("# void", p.NAME, "(){}")
+        print('.begin', p.NAME, p.parameters)
+        # Adicionar nome dos parametros na tabela de simbolos
+        for param in p.parameters.split():
+            self.symbols_table.append(param)
+            self.used_vars.append(False)
+            print("# param", param)
+        print()
+
+    @_('VOID function_name "{" statements "}"')
+    def function(self, p):
+        print('LOAD_CONST None')
+        print('RETURN_VALUE')
+        print('.end ')
+        print('# symbols table:', self.symbols_table)
+        print('# used variables:', self.used_vars)
+        self.symbols_table = []
+        self.used_vars = []
+        print()
+
+    # ---------------- parameters --------------
+
+    @_('')
+    def parameters(self, p):
+        return ''
+
+    @_('INT NAME')
+    def parameters(self, p):
+        
+        return p.NAME
+    
+    @_('INT NAME "," parameters')
+    def parameters(self, p):
+        return p.NAME + ' ' + p.parameters
+
+
     # ---------------- main ----------------
 
     @_('INT MAIN "(" ")" "{" statements "}"')
     def main(self, p):
         print('LOAD_CONST None')
         print('RETURN_VALUE')
-
+        
     # ---------------- statements ----------------
 
     @_('statement statements')
@@ -106,6 +167,11 @@ class ÇParser(Parser):
     @_('')
     def statements(self, p):
         pass
+
+    @_('function')
+    def statements(self, p):
+        pass
+
 
     # ---------------- statement ----------------
 
@@ -132,6 +198,38 @@ class ÇParser(Parser):
     @_('attribution')
     def statement(self, p):
         print()
+    
+    @_('call')
+    def statement(self, p):
+        print()
+    
+    # ---------------- call ----------------
+
+    @_('NAME')
+    def init_call(self, p):
+        print('# name(arguments);')
+        print('LOAD_NAME', p.NAME)
+
+    @_('init_call "(" arguments ")" ";"')
+    def call(self, p):
+        print('#', p.arguments)
+        print('CALL_FUNCTION', p.arguments)
+        print('POP_TOP')
+        print()
+
+    # ---------------- arguments ----------------
+
+    @_('')
+    def arguments(self, p):
+        return 1 + p.arguments
+
+    @_('expression')
+    def arguments(self, p):
+        return 1
+
+    @_('expression "," arguments')
+    def arguments(self, p):
+        return 0
 
     # ---------------- while_st ----------------
 
@@ -198,6 +296,7 @@ class ÇParser(Parser):
 
     @_('STRING')
     def printf_format(self, p):
+        print("# printf(", p.STRING, ")")
         print('LOAD_GLOBAL', 'print')
         print('LOAD_CONST', p.STRING)
 
@@ -237,6 +336,21 @@ class ÇParser(Parser):
         print('BUILD_LIST', self.num_elements)
         self.num_elements = 0
         print('STORE_NAME', p.NAME)
+
+    # ---------------- declaration empty array ----------------
+
+    @_('INT NAME "[" array_size expression "]" ";"')
+    def declaration(self, p):
+        if (p.NAME in self.symbols_table):
+            self.show_error(f"cannot redeclare variable '{p.NAME}'", p.lineno)
+        self.symbols_table.append(p.NAME)
+        self.used_vars.append(False)
+        print('CALL_FUNCTION', 1)
+        print('STORE_NAME', p.NAME)
+    
+    @_('')
+    def array_size(self, p):
+        print("LOAD_NAME array_zero")
 
     # ---------------- expressions ----------------
 

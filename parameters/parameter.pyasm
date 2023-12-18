@@ -1,0 +1,48 @@
+# #include <stdio.h>
+    LOAD_CONST          0
+    LOAD_CONST          None
+    IMPORT_NAME         runtime
+    IMPORT_STAR
+
+# void parameter(int a) {
+.begin parameter a
+
+# int b = 3;
+    LOAD_CONST          3
+    STORE_FAST          b
+
+# printf("%d\n", 
+    LOAD_GLOBAL         print
+    LOAD_CONST          "%d\n"
+    
+# a + b
+    LOAD_FAST           a
+    LOAD_FAST           b
+    BINARY_ADD
+    
+# );
+    BINARY_MODULO
+    CALL_FUNCTION       1
+    POP_TOP
+
+# }
+    LOAD_CONST          None
+    RETURN_VALUE
+.end
+
+# symbol_table: ['a', 'b']
+
+# int main() {
+
+# parameter(1);
+    LOAD_NAME           parameter
+    LOAD_CONST          2
+    CALL_FUNCTION       1
+    POP_TOP
+
+# }
+    LOAD_CONST          None
+    RETURN_VALUE
+
+# symbol_table: []
+

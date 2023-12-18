@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# version 4
+# version 5
 
 # USAGE:
 # python3 assembler.py [--run] [input_file]
@@ -27,6 +27,7 @@ comps = {'==': Compare.EQ, '!=': Compare.NE,
           '<': Compare.LT, '<=': Compare.LE,
           '>': Compare.GT, '>=': Compare.GE}
 instructions = []
+f_instructions = []
 labels = {}
 lineno = 0
 
@@ -38,6 +39,7 @@ for line in sys.stdin:
         continue
         
     op = line.split()
+
     if len(op) == 1:
         # single opcode
         if op[0].endswith(':'):
@@ -46,6 +48,16 @@ for line in sys.stdin:
             if label not in labels:
                 labels[label] = Label()
             instructions.append(labels[label])
+        elif op[0] == '.end':
+            # end function declaration
+            bytecode.extend(instructions)
+            instructions = []
+            code = bytecode.to_code()
+            # create variable for function 
+            f_instructions.extend([Instr("LOAD_CONST", code),
+                                   Instr("LOAD_CONST", function_name),
+                                   Instr("MAKE_FUNCTION", 0),
+                                   Instr("STORE_NAME", function_name)])
         else:
             # normal opcode
             instructions.append(Instr(op[0]))
@@ -67,11 +79,17 @@ for line in sys.stdin:
                 if label not in labels:
                     labels[label] = Label()
                 instructions.append(Instr(op[0], labels[label]))
+            elif op[0] == '.begin':
+                # begin function declaration
+                function_name = op[1] # save function name 
+                bytecode = Bytecode()
+                bytecode.argnames = op[2:] # list of named arguments
+                bytecode.argcount = len(op[2:])
             else:
                 # normal opcode
                 instructions.append(Instr(op[0], s))
 
-bytecode = Bytecode(instructions)
+bytecode = Bytecode(f_instructions + instructions)
 code = bytecode.to_code()
 
 # export bytecode to a executable pyc file 

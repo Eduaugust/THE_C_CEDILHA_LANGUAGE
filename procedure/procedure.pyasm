@@ -1,0 +1,37 @@
+# #include <stdio.h>
+    LOAD_CONST          0
+    LOAD_CONST          None
+    IMPORT_NAME         runtime
+    IMPORT_STAR
+
+# void procedure() {
+.begin procedure
+
+# printf("%d\n", 2);
+    LOAD_GLOBAL         print
+    LOAD_CONST          "%d\n"
+    LOAD_CONST          2
+    BINARY_MODULO
+    CALL_FUNCTION       1
+    POP_TOP
+
+# }
+    LOAD_CONST          None
+    RETURN_VALUE
+.end
+
+# symbol_table: []
+
+# int main() {
+
+# procedure();
+    LOAD_NAME           procedure
+    CALL_FUNCTION       0
+    POP_TOP
+
+# }
+    LOAD_CONST          None
+    RETURN_VALUE
+
+# symbol_table: []
+
