@@ -1,0 +1,38 @@
+# #include <stdio.h>
+    LOAD_CONST          0
+    LOAD_CONST          None
+    IMPORT_NAME         runtime
+    IMPORT_STAR
+
+# int eleven() {
+.begin eleven
+
+# return 11;
+# }
+    LOAD_CONST          11
+    RETURN_VALUE
+.end
+
+# symbol_table: []
+
+# int main() {
+
+# printf("%d\n",
+    LOAD_GLOBAL         print
+    LOAD_CONST          "%d\n"
+
+# eleven()
+    LOAD_NAME           eleven
+    CALL_FUNCTION       0
+
+# );
+    BINARY_MODULO
+    CALL_FUNCTION       1
+    POP_TOP
+
+# }
+    LOAD_CONST          None
+    RETURN_VALUE
+
+# symbol_table: []
+

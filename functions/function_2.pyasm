@@ -1,0 +1,46 @@
+# #include <stdio.h>
+    LOAD_CONST          0
+    LOAD_CONST          None
+    IMPORT_NAME         runtime
+    IMPORT_STAR
+
+# int sum(int a, int b) {
+.begin sum a b
+
+# int c = a + b;
+    LOAD_FAST           a
+    LOAD_FAST           b
+    BINARY_ADD
+    STORE_FAST          c
+
+# return c;
+# }
+    LOAD_FAST           c
+    RETURN_VALUE
+.end
+
+# symbol_table: ['a', 'b', 'c']
+
+# int main() {
+
+# int c = sum(22, 55);
+    LOAD_NAME           sum
+    LOAD_CONST          33
+    LOAD_CONST          55
+    CALL_FUNCTION       2
+    STORE_FAST          c
+
+# printf("%d\n", c);
+    LOAD_GLOBAL         print
+    LOAD_CONST          "%d\n"
+    LOAD_FAST           c
+    BINARY_MODULO
+    CALL_FUNCTION       1
+    POP_TOP
+
+# }
+    LOAD_CONST          None
+    RETURN_VALUE
+
+# symbol_table: ['c']
+

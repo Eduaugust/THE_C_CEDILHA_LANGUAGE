@@ -1,0 +1,59 @@
+# #include <stdio.h>
+    LOAD_CONST          0
+    LOAD_CONST          None
+    IMPORT_NAME         runtime
+    IMPORT_STAR
+
+# int factorial(int n) {
+.begin factorial n
+
+# if (n <= 1) {
+    LOAD_FAST           n
+    LOAD_CONST          1
+    COMPARE_OP          <=
+    POP_JUMP_IF_FALSE   NOT_IF_1
+
+# return 1;
+    LOAD_CONST          1
+    RETURN_VALUE
+
+# }
+NOT_IF_1:
+
+# return factorial(n - 1) * n;
+    LOAD_NAME           factorial
+    LOAD_FAST           n
+    LOAD_CONST          1
+    BINARY_SUBTRACT
+    CALL_FUNCTION       1
+    LOAD_FAST           n
+    BINARY_MULTIPLY
+    RETURN_VALUE
+
+# }
+.end
+
+# symbol_table: ['n']
+
+# int main() {
+
+# printf("%d\n",
+    LOAD_GLOBAL         print
+    LOAD_CONST          "%d\n"
+
+# factorial(5)
+    LOAD_NAME           factorial
+    LOAD_CONST          5
+    CALL_FUNCTION       1
+
+# );
+    BINARY_MODULO
+    CALL_FUNCTION       1
+    POP_TOP
+
+# }
+    LOAD_CONST          None
+    RETURN_VALUE
+
+# symbol_table: []
+

@@ -12,7 +12,7 @@ class ÇLexer(Lexer):
     
     # token definitions
     literals = {';', '+', '-', '*', '/', '(', ')', '{', '}', ',', '=', '%', '[', ']'}
-    tokens = {STDIO, INT, MAIN, PRINTF, STRING, NUMBER, NAME, IF, COMP, WHILE, BREAKCONTINUE, VOID}
+    tokens = {STDIO, INT, MAIN, PRINTF, STRING, NUMBER, NAME, IF, COMP, WHILE, BREAKCONTINUE, VOID, RETURN}
     STDIO   = '#include <stdio.h>'
     INT     = 'int'
     MAIN    = 'main'
@@ -24,6 +24,7 @@ class ÇLexer(Lexer):
     WHILE = 'while'
     BREAKCONTINUE = r'(break|continue)'
     VOID = 'void'
+    RETURN = 'return'
 
     # Deixar por último para não conflitar com as palavras reservadas
     NAME    = r'[a-z]+'
@@ -85,7 +86,7 @@ class ÇParser(Parser):
     
     # ---------------- program ----------------
 
-    @_('stdio functions main')
+    @_('stdio functions')
     def program(self, p):
         print('\n# symbols table:', self.symbols_table)
         print('\n# used variables:', self.used_vars)
@@ -109,7 +110,7 @@ class ÇParser(Parser):
     def functions(self, p):
         pass
 
-    @_('')
+    @_('main')
     def functions(self, p):
         pass
 
@@ -134,6 +135,19 @@ class ÇParser(Parser):
         self.symbols_table = []
         self.used_vars = []
         print()
+    
+    @_('INT function_name "{" statements "}"')
+    def function(self, p):
+        print('.end ')
+        print('# symbols table:', self.symbols_table)
+        print('# used variables:', self.used_vars)
+        self.symbols_table = []
+        self.used_vars = []
+        print()
+    
+    @_('RETURN expression ";"')
+    def return_st(self, p):
+        print('RETURN_VALUE')
 
     # ---------------- parameters --------------
 
@@ -171,6 +185,10 @@ class ÇParser(Parser):
     @_('function')
     def statements(self, p):
         pass
+    
+    @_('return_st')
+    def statements(self, p):
+        pass
 
 
     # ---------------- statement ----------------
@@ -199,7 +217,7 @@ class ÇParser(Parser):
     def statement(self, p):
         print()
     
-    @_('call')
+    @_('call ";"')
     def statement(self, p):
         print()
     
@@ -210,18 +228,17 @@ class ÇParser(Parser):
         print('# name(arguments);')
         print('LOAD_NAME', p.NAME)
 
-    @_('init_call "(" arguments ")" ";"')
+    @_('init_call "(" arguments ")"')
     def call(self, p):
         print('#', p.arguments)
         print('CALL_FUNCTION', p.arguments)
-        print('POP_TOP')
         print()
 
     # ---------------- arguments ----------------
 
     @_('')
     def arguments(self, p):
-        return 1 + p.arguments
+        return 0
 
     @_('expression')
     def arguments(self, p):
@@ -229,7 +246,7 @@ class ÇParser(Parser):
 
     @_('expression "," arguments')
     def arguments(self, p):
-        return 0
+        return 1 + p.arguments
 
     # ---------------- while_st ----------------
 
@@ -437,6 +454,10 @@ class ÇParser(Parser):
     @_('array_factor "[" expression "]"')
     def factor(self, p):
         print("BINARY_SUBSCR")
+
+    @_('call')
+    def factor(self, p):
+        pass
 
 #################### MAIN ####################
 
