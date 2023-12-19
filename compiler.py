@@ -340,7 +340,7 @@ class ÇParser(Parser):
             self.show_error(f"cannot redeclare variable '{p.NAME}'", p.lineno)
         self.symbols_table.append(p.NAME)
         self.used_vars.append(False)
-        print('STORE_NAME', p.NAME)
+        print('STORE_FAST', p.NAME)
     
     # declaration of an array
     @_('INT NAME "[" "]" "=" "{" expressions "}" ";"')
@@ -442,7 +442,7 @@ class ÇParser(Parser):
         if (p.NAME not in self.symbols_table):
             self.show_error(f"unknown variable '{p.NAME}'", p.lineno)
         self.used_vars[self.symbols_table.index(p.NAME)] = True
-        print('LOAD_NAME', p.NAME)
+        print('LOAD_FAST', p.NAME)
 
     @_('NAME')
     def array_factor(self, p):
