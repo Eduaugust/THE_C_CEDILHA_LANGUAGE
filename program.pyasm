@@ -4,23 +4,21 @@ LOAD_CONST None
 IMPORT_NAME runtime
 IMPORT_STAR
 
-# void eleven (){}
-.begin eleven 
+LOAD_CONST 2
+STORE_FAST a
 
-LOAD_CONST 11
-RETURN_VALUE
-.end 
-# symbols table: []
-# used variables: []
+LOAD_FAST a
+LOAD_CONST 3
+BINARY_MULTIPLY
+STORE_FAST b
+
+LOAD_CONST 4
+STORE_FAST c
 
 # printf( "%d\n" )
 LOAD_GLOBAL print
 LOAD_CONST "%d\n"
-# name(arguments);
-LOAD_NAME eleven
-# 0
-CALL_FUNCTION 0
-
+LOAD_FAST a
 BINARY_MODULO
 CALL_FUNCTION 1
 POP_TOP
@@ -28,6 +26,6 @@ POP_TOP
 LOAD_CONST None
 RETURN_VALUE
 
-# symbols table: []
+# symbols table: ['a', 'b', 'c']
 
-# used variables: []
+# used variables: [True, False, False]

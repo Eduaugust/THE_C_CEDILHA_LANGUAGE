@@ -1,0 +1,33 @@
+# int a = 1;
+    LOAD_CONST          1
+    STORE_NAME          a
+
+# while (a < 3) {
+BEGIN_WHILE_1:
+    LOAD_NAME           a
+    LOAD_CONST          3
+    COMPARE_OP          <=
+    POP_JUMP_IF_FALSE   END_WHILE_1
+
+# printf("%d\n", a);
+    LOAD_GLOBAL         print
+    LOAD_CONST          "%d\n"
+    LOAD_NAME           a
+    BINARY_MODULO
+    CALL_FUNCTION       1
+    POP_TOP
+
+# a = a + 1;
+    LOAD_NAME           a
+    LOAD_CONST          1
+    BINARY_ADD
+    STORE_NAME          a
+
+    JUMP_ABSOLUTE       BEGIN_WHILE_1
+END_WHILE_1:
+
+    LOAD_CONST          None
+    RETURN_VALUE
+
+# symbol_table: ['a']
+

@@ -55,6 +55,7 @@ class ÇParser(Parser):
     def __init__(self):
         self.symbols_table = []
         self.used_vars = []
+        self.type_vars = []
 
         # if statements
         self.if_count = 1
@@ -66,9 +67,6 @@ class ÇParser(Parser):
 
         # array
         self.num_elements = 0
-
-        # parameter
-        self.parameter_symbol_table = []
 
     # error handling method
     def show_error(self, mesg, line=None):
@@ -122,6 +120,7 @@ class ÇParser(Parser):
         for param in p.parameters.split():
             self.symbols_table.append(param)
             self.used_vars.append(False)
+            self.type_vars.append('int')
             print("# param", param)
         print()
 
@@ -134,6 +133,7 @@ class ÇParser(Parser):
         print('# used variables:', self.used_vars)
         self.symbols_table = []
         self.used_vars = []
+        self.type_vars = []
         print()
     
     @_('INT function_name "{" statements "}"')
@@ -143,6 +143,7 @@ class ÇParser(Parser):
         print('# used variables:', self.used_vars)
         self.symbols_table = []
         self.used_vars = []
+        self.type_vars = []
         print()
     
     @_('RETURN expression ";"')
@@ -226,7 +227,7 @@ class ÇParser(Parser):
     @_('NAME')
     def init_call(self, p):
         print('# name(arguments);')
-        print('LOAD_NAME', p.NAME)
+        print('LOAD_FAST', p.NAME)
 
     @_('init_call "(" arguments ")"')
     def call(self, p):
@@ -330,7 +331,9 @@ class ÇParser(Parser):
     def load_array(self, p):
         if (p.NAME not in self.symbols_table):
             self.show_error(f"unknown variable '{p.NAME}'", p.lineno)
-        print('LOAD_NAME', p.NAME)
+        if (self.type_vars[self.symbols_table.index(p.NAME)] != 'array'):
+            self.show_error(f"'{p.NAME}' is not an array", p.lineno)
+        print('LOAD_FAST', p.NAME)
 
     # ---------------- declaration ----------------
     
@@ -340,6 +343,7 @@ class ÇParser(Parser):
             self.show_error(f"cannot redeclare variable '{p.NAME}'", p.lineno)
         self.symbols_table.append(p.NAME)
         self.used_vars.append(False)
+        self.type_vars.append('int')
         print('STORE_FAST', p.NAME)
     
     # declaration of an array
@@ -349,10 +353,11 @@ class ÇParser(Parser):
             self.show_error(f"cannot redeclare variable '{p.NAME}'", p.lineno)
         self.symbols_table.append(p.NAME)
         self.used_vars.append(False)
+        self.type_vars.append('array')
         print("#", p.NAME, p.expressions)
         print('BUILD_LIST', self.num_elements)
         self.num_elements = 0
-        print('STORE_NAME', p.NAME)
+        print('STORE_FAST', p.NAME)
 
     # ---------------- declaration empty array ----------------
 
@@ -362,12 +367,13 @@ class ÇParser(Parser):
             self.show_error(f"cannot redeclare variable '{p.NAME}'", p.lineno)
         self.symbols_table.append(p.NAME)
         self.used_vars.append(False)
+        self.type_vars.append('array')
         print('CALL_FUNCTION', 1)
-        print('STORE_NAME', p.NAME)
+        print('STORE_FAST', p.NAME)
     
     @_('')
     def array_size(self, p):
-        print("LOAD_NAME array_zero")
+        print("LOAD_FAST array_zero")
 
     # ---------------- expressions ----------------
 
@@ -388,7 +394,9 @@ class ÇParser(Parser):
     def attribution(self, p): 
         if (p.NAME not in self.symbols_table):
             self.show_error(f"unknown variable '{p.NAME}'", p.lineno)
-        print('STORE_NAME', p.NAME)
+        if (self.type_vars[self.symbols_table.index(p.NAME)] == 'array'):
+            self.show_error(f"'{p.NAME}' is not an int", p.lineno)
+        print('STORE_FAST', p.NAME)
 
     @_('load_array "[" expression "]" "=" expression ";"')
     def attribution(self, p):
@@ -441,6 +449,8 @@ class ÇParser(Parser):
     def factor(self, p):
         if (p.NAME not in self.symbols_table):
             self.show_error(f"unknown variable '{p.NAME}'", p.lineno)
+        if (self.type_vars[self.symbols_table.index(p.NAME)] == 'array'):
+            self.show_error(f"'{p.NAME}' is not an int", p.lineno)
         self.used_vars[self.symbols_table.index(p.NAME)] = True
         print('LOAD_FAST', p.NAME)
 
@@ -448,8 +458,11 @@ class ÇParser(Parser):
     def array_factor(self, p):
         if (p.NAME not in self.symbols_table):
             self.show_error(f"unknown variable '{p.NAME}'", p.lineno)
+        if (self.type_vars[self.symbols_table.index(p.NAME)] != 'array'):
+            self.show_error(f"'{p.NAME}' is not an array", p.lineno)
+        
         self.used_vars[self.symbols_table.index(p.NAME)] = True
-        print('LOAD_NAME', p.NAME)
+        print('LOAD_FAST', p.NAME)
 
     @_('array_factor "[" expression "]"')
     def factor(self, p):
