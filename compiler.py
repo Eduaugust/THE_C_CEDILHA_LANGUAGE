@@ -131,6 +131,10 @@ class ÇParser(Parser):
         print('.end ')
         print('# symbols table:', self.symbols_table)
         print('# used variables:', self.used_vars)
+        unusued_vars = [var for var, used in zip(self.symbols_table, self.used_vars) if not used]
+        if unusued_vars:
+            for var in unusued_vars:
+                self.show_warning(f'{var} is defined but never used')
         self.symbols_table = []
         self.used_vars = []
         self.type_vars = []
@@ -141,6 +145,10 @@ class ÇParser(Parser):
         print('.end ')
         print('# symbols table:', self.symbols_table)
         print('# used variables:', self.used_vars)
+        unusued_vars = [var for var, used in zip(self.symbols_table, self.used_vars) if not used]
+        if unusued_vars:
+            for var in unusued_vars:
+                self.show_warning(f'{var} is defined but never used')
         self.symbols_table = []
         self.used_vars = []
         self.type_vars = []
@@ -227,7 +235,7 @@ class ÇParser(Parser):
     @_('NAME')
     def init_call(self, p):
         print('# name(arguments);')
-        print('LOAD_FAST', p.NAME)
+        print('LOAD_NAME', p.NAME)
 
     @_('init_call "(" arguments ")"')
     def call(self, p):
@@ -373,7 +381,7 @@ class ÇParser(Parser):
     
     @_('')
     def array_size(self, p):
-        print("LOAD_FAST array_zero")
+        print("LOAD_NAME array_zero")
 
     # ---------------- expressions ----------------
 
